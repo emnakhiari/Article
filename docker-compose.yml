@@ -1,13 +1,27 @@
-version: '2'
-
+version: "3.8"
 services:
-  sonarqube:
-    image: sonarqube
+  mysqldb:
+    image: "mysql:5.6"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=achatdb
     ports:
-      - "9000:9000"
-      - "9092:9092"
-
-  nexus:
-    image: sonatype/nexus3
+      - "3306:3306"
+    restart: unless-stopped
+    volumes:
+      - db:/var/lib/mysql
+  app-achat:
+    image: "emnakhiari893/achat:1.0"
     ports:
-      - "8081:8081"
+      - "8089:8089"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysqldb:3306/achatdb?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    restart: unless-stopped
+    depends_on:
+      - mysqldb
+    stdin_open: true
+    tty: true
+volumes:
+  db:
